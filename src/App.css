@@ -1,0 +1,83 @@
+.App {
+  min-height: 100%;
+}
+
+.App-logo {
+  animation: App-logo-spin infinite 20s linear;
+  height: 80px;
+}
+
+.App-header {
+  background-color: #222;
+  height: 150px;
+  padding: 20px;
+  color: white;
+  text-align: center;
+}
+
+.App-title {
+  font-size: 1.5em;
+}
+.container {
+  padding: 10px;
+  margin: auto;
+  width: 1000px;
+}
+table {
+
+  border-collapse: collapse;
+  border: 2px solid white;
+}
+td {
+  border: 1px solid;
+
+}
+.left-column {
+  margin-top: 100px;
+  margin-left: 100px;
+  float: left;
+}
+.right-column {
+  float: right;
+  margin-top: 200px;
+}
+.players {
+  clear: both;
+  text-align: right;
+  line-height: 30px;
+  margin-bottom: 10px;
+}
+label{
+  float: left;
+  padding-right: 10px;
+}
+.radio{
+  display: inline-block;
+  margin-top: 10px;
+  font-size: 1.5em;
+}
+.grid {
+  padding: 25px;
+}
+.grids-render {
+  margin: 20px;
+  height: 99px;
+  width: 99px;
+  cursor: pointer;
+}
+.xclicked {
+  margin: 0;
+  height: 100px;
+  width: 100px;
+  background-image: url("x1.png");
+}
+.oclicked {
+  margin: 0;
+  height: 91px ;
+  width: 91px ;
+  background-image: url("o.png");
+}
+@keyframes App-logo-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
