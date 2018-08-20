@@ -1,145 +1,156 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
+import Game from "./Game";
+import {setToState,getFromState} from "./allState";
+import {calculateWinner,miniMax} from './computer';
 
 class App extends Component {
     constructor(props) {
         super(props);
         this.state= {
-            Fplayer:'',
-            Splayer:'',
-            Fmove: true,
-            Smove:false,
-            grids: this.initTable(),
-            isNext: true
+            switcher:0,
         };
         this.handleChange= this.handleChange.bind(this);
-        this.handleClick= this.handleClick.bind(this);
+        this.handleStart= this.handleStart.bind(this);
+        this.Winner= this.Winner.bind(this);                //receiving props from game table, declaring winner
+        this.reset= this.reset.bind(this);
+        this.miniStart= this.miniStart.bind(this);
     }
     handleChange(event) {
         const target=event.target;
         const name= target.name;
-        this.setState({[name]:event.target.value});
+        this.setState({});
+        setToState({[name]:event.target.value});
     }
-    handleClick(i) {
-        const td = Number(i.target.id.replace(/\D/gi, ''));
-        const row = Number(i.target.parentNode.id.replace(/\D/gi, ''));
-        const grids =this.state.grids;
-        let switcher=false;
-        if (this.state.isNext && grids[row][td]==='' ) {
-            grids[row][td] = 'x';
-            switcher=true;
+    miniStart () {
+        setToState({start: true, ai: true});
+        //miniMax(getFromState().grids,0,'O');
+        this.setState({});
+    }
+    handleStart() {
+        if(getFromState().fPlayer !== '' && getFromState().sPlayer !== '') {
+            setToState({start: true, nextTurn: getFromState().defTurn});
+            this.setState({
+                switcher:1
+            });
         }
-        else if (!this.state.isNext &&grids[row][td]==='') {
-            grids[row][td] = 'o';
-            switcher=true;
+        else {
+            setToState({placeholder:'please fill out this fields'});
+            this.setState({
+               switcher:1
+            });
         }
-         this.setState({
-             grids: grids,
-             isNext: switcher ?
-                 !this.state.isNext:
-                  this.state.isNext,
+    }
+    reset(){
+        this.setState({
+           switcher:0
+        })
+    }
 
-         });
-    }
-    initTable() {
-        let n=3,m=3;
-        const grids =[];
-        for (let k = 0; k < n; k += 1) {
-            grids[k] = [];
-            for (let j = 0; j < m; j += 1) {
-                grids[k][j] = '';
-                // {/*<div className="xclicked" > </div>;*/
-                // }
+    Winner(grids) { //starting after Game component initialise
+        this.setState({});
+        if(calculateWinner(grids,'X')) {
+            let whoWin = 'X';
+            this.stopGame(whoWin);
+        }
+            if (calculateWinner(grids, 'O')) {
+                let whoWin='O';
+                this.stopGame(whoWin);
             }
+    }
+    stopGame(whoWin) {
+        let winner='';
+        let fPlayer=getFromState().fPlayer;
+        let sPlayer=getFromState().sPlayer;
+        if (getFromState().fComputer !== ''){
+             fPlayer=getFromState().fComputer;
         }
-        return grids;
-    }
-
-    renderLine() {
-        let tr = [];
-
-        for(let index = 0; index < 3; index += 1) {
-            const key = `${index}_tr`;
-            tr.push(
-                <tr key={key} id={key}>
-                    {this.renderGrids(index)}
-
-                </tr>
-            );
+        else if (getFromState().sComputer !== ''){
+             sPlayer=getFromState().sComputer;
         }
-        return tr;
-    }
-    renderGrids(index) {
-        let td = [];
-           for(let indextd = 0; indextd < 3; indextd += 1) {
-               const key = `${indextd}_td`;
-               let draw = '';
-               if (this.state.grids[index][indextd].localeCompare('x')===0) {
-                   draw = "xclicked";
-               }
-               else if(this.state.grids[index][indextd].localeCompare('o')===0){
-                   draw = "oclicked";
-               }
-               td.push(
-                   <td id={key} className={`grids-render ${draw}`} key={key} onClick={this.handleClick}>
-                   </td>
-               );
-    }
-    return td;
+        if(whoWin ==='X') {
+            winner=`${fPlayer}, who played for ${whoWin}, won`;
+        }
+        else if(whoWin ==='O') {
+            winner=`${sPlayer}, who played for ${whoWin}, won`;
+        }
+        setToState({winner: winner});
+        this.setState({});
     }
 
   render() {
-        const winner=calculateWinner(this.state.grids);
-        let status;
-        if (winner) {
-            status = 'Winner: ' + winner;
+        let playerF,playerS;
+        if (getFromState().defTurn === 'X'){
+            playerF='First Player';
+            playerS='Second Player';
         }
         else {
-            status = 'Next player: ' + (this.state.isNext ?
-                this.state.Fplayer:
-                this.state.Splayer);
+            playerS='First Player';
+            playerF='Second Player';
         }
-    return (
+        let hide='';
+        let status;
+        const winner=getFromState().winner;
+        if(getFromState().start) {
+            hide='disable';
+        }
+        else{
+            hide='';
+        }
+        if (winner !== '') {
+            status = 'Winner: ' + winner;
+        }
+        else if(getFromState().start){
+            status= 'Next player: ' + (getFromState().nextTurn === 'X' ?
+                getFromState().fPlayer:
+                getFromState().sPlayer);
+        }
+      return (
       <div className="App">
         <header className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
           <h1 className="App-title">Welcome to React</h1>
         </header>
         <div className="container">
-            <div className="left-column">
-                <table>
-                    <tbody>
-                    {this.renderLine()}
-                    </tbody>
-                </table>
-            </div>
+            {/*<FirstStep next={this.state.reset}/>*/}
+            {getFromState().start ?
+                <Game Winner={this.Winner} reset={this.reset}/> :
+                null
+            }
             <div className="right-column">
                 <div className="players">
-                    <label>First player</label>
-                    <input type="text" name="Fplayer" value={this.state.Fplayer} onChange={this.handleChange}/>
+                    <label>{`${playerF}`}</label>
+                    <input type="text" name="fPlayer" id='fReq' className={`inputs ${hide}`} placeholder={getFromState().placeholder}
+                           maxLength={15} value={getFromState().fPlayer} onChange={this.handleChange}/>
+                    <div className="checkbox"><input type="checkbox" value={'X'} name='fComputer' checked={getFromState().fComputer === 'X'} className={`${hide}`}
+                                                     onChange={this.handleChange}/>
+                    </div>
                 </div>
                 <div className="players">
-                    <label>Second player</label>
-                    <input type="text"  name="Splayer" value={this.state.Splayer} onChange={this.handleChange}/>
+                    <label>{`${playerS}`}</label>
+                    <input type="text"  name="sPlayer" id='sReq' className={`inputs ${hide}`} placeholder={getFromState().placeholder}
+                           maxLength={15} value={getFromState().sPlayer} onChange={this.handleChange}/>
+                    <div className="checkbox"><input type="checkbox" value={'O'} name='sComputer' checked={getFromState().sComputer === 'O'} className={`${hide}`}
+                                                     onChange={this.handleChange}/>
+                    </div>
                 </div>
                 <div className="players">
                     <label>First move</label>
-                    <div className="radio"><input type="radio" name="Fmove" value={this.state.Fmove}
-                                                  onChange={this.handleChange} checked/>X</div>
-                    <div className="radio"><input type="radio" name="Fmove" value={this.state.Smove}
+                    <div className={`radio ${hide}`}><input type="radio" name="defTurn" id='defTurn'  defaultChecked value={'X'}
+                                                  onChange={this.handleChange} />X</div>
+                    <div className={`radio ${hide}`}><input type="radio" name="defTurn" id='defTurn' value={'O'}
                                                   onChange={this.handleChange} />O</div>
                 </div>
-                {/*<div className="switch">*/}
-                    {/*<input type="checkbox" id="switch" className="switch-check"/>*/}
-                    {/*<label htmlFor="switch" className="switch-label">*/}
-                        {/*First step*/}
-                        {/*<span className="switch-slider switch-slider-on"></span>*/}
-                        {/*<span className="switch-slider switch-slider-"></span>*/}
-                    {/*</label>*/}
-                {/*</div>*/}
-                <div className="status">
-                {status}
+                <div className="players">
+                    <label>Start game</label>
+                        <button className="customButton" onClick={this.handleStart} >Start</button>
+                </div>
+                <div className="players">
+                    <label id='status'>{status}</label>
+                </div>
+                <div className="players">
+                    <button className='customButton' onClick={this.miniStart}>minimax</button>
                 </div>
             </div>
         </div>
@@ -147,27 +158,4 @@ class App extends Component {
     );
   }
 }
-
- function calculateWinner(grids) {
-
-    console.log(grids)
- }
-//     const lines = [
-//         [0, 1, 2],
-//         [3, 4, 5],
-//         [6, 7, 8],
-//         [0, 3, 6],
-//         [1, 4, 7],
-//         [2, 5, 8],
-//         [0, 4, 8],
-//         [2, 4, 6],
-//     ];
-//     for (let i = 0; i < lines.length; i++) {
-//         const [a, b, c] = lines[i];
-//         if (grids[a] && grids[a] === grids[b] && grids[a] === grids[c]) {
-//             return grids[a];
-//         }
-//     }
-//     return console.log(grids);
-// }
 export default App;

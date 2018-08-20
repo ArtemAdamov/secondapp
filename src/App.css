@@ -22,6 +22,7 @@
   padding: 10px;
   margin: auto;
   width: 1000px;
+  height: 2000px;
 }
 table {
 
@@ -36,12 +37,14 @@ td {
   margin-top: 100px;
   margin-left: 100px;
   float: left;
+  position: absolute;
 }
 .right-column {
   float: right;
-  margin-top: 200px;
+  margin-top: 100px;
 }
 .players {
+  position: relative;
   clear: both;
   text-align: right;
   line-height: 30px;
@@ -60,22 +63,53 @@ label{
   padding: 25px;
 }
 .grids-render {
-  margin: 20px;
+  margin: 20px ;
   height: 99px;
   width: 99px;
   cursor: pointer;
 }
 .xclicked {
   margin: 0;
-  height: 100px;
-  width: 100px;
+  height: 99px;
+  width: 99px;
   background-image: url("x1.png");
 }
 .oclicked {
   margin: 0;
-  height: 91px ;
-  width: 91px ;
+  height: 99px ;
+  width: 99px ;
   background-image: url("o.png");
+}
+.button {
+  margin-left: 105px;
+  padding: 10px;
+}
+.inputs {
+  border: 1px solid;
+  border-radius: 2px;
+}
+.checkbox {
+  position: relative;
+  margin: 3px 0 0 -23px;
+  float: right;
+  z-index: 2;
+}
+.disable {
+    pointer-events: none;
+    background: white;
+}
+.customButton {
+  height: 50px;
+  width: 80px;
+  font-weight: 700;
+  color: white;
+  text-decoration: none;
+  padding: .8em 1em calc(.8em + 3px);
+  border-radius: 2px;
+  cursor: pointer;
+  background: rgb(64,199,129);
+  box-shadow: 0 -3px rgb(53,167,110) inset;
+  transition: 0.2s;
 }
 @keyframes App-logo-spin {
   from { transform: rotate(0deg); }
