@@ -54,10 +54,8 @@ class App extends Component {
             let newBoard = moveAI(getFromState().grids);
             this.Winner(newBoard);
             this.setState({});
-            return setToState({grids: newBoard});
+            setToState({grids: newBoard});
         }
-        else return null
-
     }
     Winner(grids) { //starting after Game component initialise
         this.setState({});
@@ -127,7 +125,7 @@ class App extends Component {
       <div className="App">
         <header className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
-          <h1 className="App-title"><a    href={'https://reactjs.org'} >Welcome to React</a></h1>
+          <h1 className="App-title"><a className='react-link' href={'https://reactjs.org'} >Welcome to React</a></h1>
         </header>
         <div className="container">
             {getFromState().start ?

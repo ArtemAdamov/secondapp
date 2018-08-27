@@ -18,11 +18,17 @@
 .App-title {
   font-size: 1.5em;
 }
+.react-link {
+  color: white;
+  text-decoration: none;
+}
+.react-link:visited {
+  color: white;
+}
 .container {
   padding: 10px;
   margin: auto;
   width: 1000px;
-  height: 2000px;
 }
 table {
   border-collapse: collapse;
