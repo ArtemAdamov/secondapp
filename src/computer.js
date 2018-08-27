@@ -1,5 +1,15 @@
 import {getFromState, setToState} from "./allState";
 
+export function moveAI(board) {
+    const obj = {
+        '1': () => randSteps(board),
+        '2': () => normalAI(board),
+        '3': () => moveMinimax(board),
+    };
+    const dif = getFromState().difficult;
+    return obj[dif]();
+}
+
 export function randSteps(grids) {
     let m=randomInt(0,getFromState().fieldSize-1);
     let n=randomInt(0,getFromState().fieldSize-1);
@@ -35,62 +45,6 @@ function randomInt(min, max) {
     }
     return false;
 }
-export function miniMax(newBoard, depth, computer) {
-
-    const gameState = calculateWinner(newBoard, 'O');
-    if (gameState === false) {
-        const values = [];
-        for (let i = 0; i < getFromState().fieldSize; i += 1) {
-            for (let j = 0; j < getFromState().fieldSize; j += 1) {
-                const gridCopy = JSON.parse(JSON.stringify(newBoard));
-                    //newBoard.slice();
-                    // JSON.parse(JSON.stringify(newBoard));
-                if (gridCopy[i][j] !== '') continue;
-                gridCopy[i][j] = computer;
-                //debugger;
-                const value = miniMax(gridCopy, depth + 1, (computer === 'O') ? 'X': 'O');
-                values.push({
-                    cost: value,
-                    cell: {
-                        i: i,
-                        j: j
-                    }
-                });
-            }
-        }
-debugger;
-        if (computer === 'X') {
-            const max = values.find(x => x.cost === Math.max(...values.map(v => v.cost)));
-            console.log('a',max);
-            if (depth === 0) {
-                return max.cell;
-            }
-            else {
-                console.log(max.cell);
-                return max.cost
-            }
-        }
-        else {
-            const min = values.find(x => x.cost === Math.min(...values.map(v => v.cost)));
-            if (depth === 0) {
-                return min.cell;
-            }
-            else {
-                return min.cost
-            }
-        }
-    }
-    else if (boardNotFull(newBoard) === false) { // temporary x is a computer
-        return 0;
-    }
-    else if (calculateWinner(newBoard,'X') === true) {
-        return depth - 10;
-    }
-    else if (gameState === true) {
-        return 10 - depth;
-    }
-}
-
 export function calculateWinner(grids,filledGrid) {
     let diagMain, diagSecond, line, col;
     for (let i = 0; i < getFromState().fieldSize; i += 1) {
@@ -122,4 +76,153 @@ export function calculateWinner(grids,filledGrid) {
         return true;
     }
     return false;
+}
+function normalAI(board) {
+    let ifWin = false;
+    let ai ,player;
+    if (getFromState().nextTurn === 'X') {
+        ai = 'X';
+        player = 'O';
+    } else {
+        ai = 'O';
+        player= 'X';
+    }
+    for (let i = 0; i < getFromState().fieldSize; i++) {
+        for (let j = 0; j < getFromState().fieldSize; j++) {
+            if (board[i][j] === '') {
+                board[i][j] = player;
+                ifWin = calculateWinner(board,player);
+                //debugger;
+                if (ifWin) {
+                     board[i][j]= ai;
+                     setToState({nextTurn: player});
+                     return board;
+                }
+                board[i][j]= '';
+            }
+        }
+    }
+     return randSteps(board)
+}
+function moveMinimax (board) {
+    let player= false;
+    if (getFromState().nextTurn === 'X') {
+        player = true;
+    }
+    const newBoard=[];
+    for (let k = 0; k < getFromState().fieldSize; k += 1) {
+        newBoard[k] = [];
+        for (let j = 0; j < getFromState().fieldSize; j += 1) {
+            if (board[k][j] === ''){
+                newBoard[k][j] = null
+            }
+            if (board[k][j] === 'X'){
+                newBoard[k][j] = true
+            }
+            if (board[k][j] === 'O'){
+                newBoard[k][j] = false
+            }
+        }
+    }
+    let oldBoard=recurseMinimax(newBoard,player)[1];
+    const newBoard1=[];
+    for (let k = 0; k < getFromState().fieldSize; k += 1) {
+        newBoard1[k] = [];
+        for (let j = 0; j < getFromState().fieldSize; j += 1) {
+            if (oldBoard[k][j] === null){
+                newBoard1[k][j] = ''
+            }
+            if (oldBoard[k][j] === true){
+                newBoard1[k][j] = 'X'
+            }
+            if (oldBoard[k][j] === false){
+                newBoard1[k][j] = 'O'
+            }
+        }
+    }
+    if (getFromState().nextTurn === 'X') {
+        setToState({nextTurn: 'O'});
+    }
+    else {
+        setToState({nextTurn: 'X'});
+    }
+    return newBoard1;
+}
+function recurseMinimax(board, player) {
+    let winner = getWinner(board);
+    if (winner != null) {
+        switch(winner) {
+            case 1:
+                return [1, board];
+            case 0:
+                return [-1, board];
+            case -1:
+                return [0, board];
+                default :
+        }
+    } else {
+        let nextVal = null;
+        let nextBoard = null;
+        for (let i = 0; i < getFromState().fieldSize; i++) {
+            for (let j = 0; j < getFromState().fieldSize; j++) {
+                if (board[i][j] === null) {
+                    board[i][j] = player;
+                    let value = recurseMinimax(board, !player)[0];
+                    if (
+                        (player && (nextVal === null || value > nextVal)) ||
+                        (!player && (nextVal === null || value < nextVal))
+                    ) {
+                        nextBoard = board.map(function(arr) {
+                            return arr.slice();
+                        });
+                        nextVal = value;
+                    }
+                    board[i][j] = null;
+                }
+            }
+        }
+        return [nextVal, nextBoard];
+    }
+}
+function getWinner(board) {
+    let vals = [true, false];
+    let allNotNull = true;
+    for (let k = 0; k < vals.length; k++) {
+        let value = vals[k];
+
+        // Check rows, columns, and diagonals
+        let diagonalComplete1 = true;
+        let diagonalComplete2 = true;
+        for (let i = 0; i < getFromState().fieldSize; i++) {
+            if (board[i][i] !== value) {
+                diagonalComplete1 = false;
+            }
+            if (board[getFromState().fieldSize - 1 - i][i] !== value) {
+                diagonalComplete2 = false;
+            }
+            let rowComplete = true;
+            let colComplete = true;
+            for (let j = 0; j < getFromState().fieldSize; j++) {
+                if (board[i][j] !== value) {
+                    rowComplete = false;
+                }
+                if (board[j][i] !== value) {
+                    colComplete = false;
+                }
+                if (board[i][j] === null) { //==
+                    allNotNull = false;
+                }
+            }
+            if (rowComplete || colComplete) {
+                return value ? 1 : 0;
+            }
+        }
+        if (diagonalComplete1 || diagonalComplete2) {
+            return value ? 1 : 0;
+        }
+    }
+    if (allNotNull) {
+        return -1;
+    }
+    return null;
 }

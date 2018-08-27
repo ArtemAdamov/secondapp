@@ -5,12 +5,13 @@ let sendToState={
     nextTurn: '',
     fPlayer:'first',
     sPlayer:'sec',
-    fComputer: '',
-    sComputer: '',
+    fComputer: false,
+    sComputer: false,
     start: null,
     winner:'',
     placeholder:'',
-    grids: initTable()
+    grids: initTable(),
+    difficult: '1'
 };
 export function initTable() {
     const grids =[];
@@ -30,5 +31,5 @@ export function setToState(state) {
         ...sendToState,
         ...state
     };
-    console.log(getFromState());
+    //console.log(getFromState());
 }

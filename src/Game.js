@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import './App.css';
-import {randSteps, boardNotFull,miniMax} from "./computer";
+import {boardNotFull, moveAI} from "./computer";
 import {getFromState, setToState, initTable} from "./allState";
 class Game extends Component {
     constructor(props) {
@@ -10,11 +10,9 @@ class Game extends Component {
         };
         this.handleClick= this.handleClick.bind(this);
         this.handleReset= this.handleReset.bind(this);
-        this.computerPlay= this.computerPlay.bind(this);
-        this.moveAI=this.moveAI.bind(this);
     }
     componentDidMount() {
-        this.intervalId = setInterval(this.computerPlay, 2000);
+        this.intervalId = setInterval(this.computerPlay.bind(this), 500);
     }
     componentWillUnmount(){
         clearInterval(this.intervalId);
@@ -33,46 +31,34 @@ class Game extends Component {
                 grids[row][td] = 'O';
                 turn = 'X';
             }
-            this.setState({});
             setToState({grids:grids, nextTurn: turn});
             this.props.Winner(grids);
+            this.setState({});
         }
-         if (getFromState().ai === true) {
-             this.moveAI();
-         }
     }
-    moveAI () {
-        const grids = getFromState().grids;
-        const ind = miniMax(grids, 0, 'O');
-        grids[ind.i][ind.j] = 'O';
-        setToState({grids: grids});
-        this.setState({});
-        console.log(grids);
+    computerPlay () {
+        if (getFromState().winner === '' && boardNotFull(getFromState().grids)) {
+            if ((getFromState().nextTurn === 'X' && getFromState().fComputer)
+                || (getFromState().sComputer && getFromState().nextTurn === 'O')){
+                let newBoard = moveAI(getFromState().grids);
+                setToState({ grids: newBoard});
+                this.props.Winner(getFromState().grids);
+            }
+        }
+        else clearInterval(this.intervalId);
     }
     handleReset() {
         setToState({grids:initTable(),
             nextTurn:getFromState().defTurn,
             winner: '',
             start: false,
-            fComputer:'',
-            sComputer:''
+            fComputer:false,
+            sComputer:'',
+            difficult: '1'
         });
         this.props.reset();
     }
-
-    computerPlay() {
-        console.log('s');
-        this.setState({
-        });
-        if(getFromState().winner === '' && boardNotFull(getFromState().grids)){
-            if(getFromState().fComputer === getFromState().nextTurn || getFromState().sComputer === getFromState().nextTurn)
-                randSteps(getFromState().grids);
-            this.props.Winner(getFromState().grids);
-        }
-            else
-                clearInterval( this.intervalId)
-    }
-       renderLine() {
+    renderLine() {
         let tr = [],i=getFromState().fieldSize;
         for(let index = 0; index < i; index += 1) {
             const key = `${index}_tr`;
