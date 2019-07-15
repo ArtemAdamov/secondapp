@@ -140,7 +140,7 @@ class App extends Component {
                                                             checked={getFromState().fComputer}
                                                             onChange={ this.handleCheck}/>
                         </div>
-                        <div className='computer-label'>Play vs computer</div>
+                        <div className='computer-label'>computer</div>
                         <select className={`inputs ${hide}`} name="difficult" value={getFromState().difficult} onChange={this.handleChange}>
                             <option value={0} disabled > difficult</option>
                             <option value={1}>easy</option>
